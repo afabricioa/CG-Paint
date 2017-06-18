@@ -1,0 +1,8 @@
+# depslib dependency file v1.0
+1497746335 source:/Users/Fabricio/Desktop/CG/PaintCGP2/main.cpp
+	<GLUT/glut.h>
+	<GL/glut.h>
+	<cmath>
+	<cstdio>
+	<cstdlib>
+
