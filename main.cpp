@@ -29,6 +29,7 @@ bool fechaPoligono = false, pegaRaio = false;
 double x_1,y_1,x_2,y_2,x_3,y_3;
 double raio;
 
+double escalaX = 1, escalaY = 1, translacaoX, translacaoY, fatorCisalhamento = 1, anguloRotacao;
 int width = 512, height = 512; //Largura e altura da janela
 
 // Estrututa de dados para o armazenamento dinamico dos pontos
@@ -55,18 +56,6 @@ ponto * temp = NULL;
 
 //Lista de coordenadas
 coordenadasArmazenadas *listaCoord;
-
-// Funcao para armazenar um ponto na lista
-// Armazena como uma Pilha (empilha)
-ponto * pushPonto(int x, int y){
-	ponto * pnt;
-	pnt = new ponto;
-	pnt->x = x;
-	pnt->y = y;
-	pnt->prox = pontos;
-	pontos = pnt;
-	return pnt;
-}
 
 coordenadasArmazenadas * storeCoordenada(int x1, int y1, int x2, int y2){
 	coordenadasArmazenadas *coordArmaz;
@@ -129,6 +118,19 @@ coordenadasArmazenadas * storeCoordenada(int x1, int y1, int x2, int y2){
 	}
 }
 
+
+// Funcao para armazenar um ponto na lista
+// Armazena como uma Pilha (empilha)
+ponto * pushPonto(int x, int y){
+	ponto * pnt;
+	pnt = new ponto;
+	pnt->x = x;
+	pnt->y = y;
+	pnt->prox = pontos;
+	pontos = pnt;
+	return pnt;
+}
+
 // Funcao para desarmazenar um ponto na lista
 // Desarmazena como uma Pilha (desempilha)
 ponto * popPonto(){
@@ -158,6 +160,9 @@ void bresenham(double x1,double y1,double x2,double y2);
 void desenhaQuadrilatero(double x1,double y1,double x2,double y2);
 void desenhaTriangulo(double x1,double y1,double x2,double y2,double x3,double y3);
 void desenhaCirculo(double x1,double y1, double r);
+void escala();
+void cisalhamentoEmX();
+void cisalhamentoEmY();
 
 // Funcao que percorre a lista de pontos desenhando-os na tela
 void drawPontos();
@@ -434,11 +439,66 @@ void menuOpcoes(int value){
 			click2 = false;
         break;
 
-        case 5:
+        case 5: //Escala
+            triangulo = false;
+			linha = false;
+			quadrilatero = false;
+			poligono = false;
+			circulo = false;
+            system("cls");
+            printf("\n Digite o valor de escala em X: ");
+            scanf("%lf", &escalaX);
+            printf("\n Digite o valor de escala em Y: ");
+            scanf("%lf", &escalaY);
+            escala();
+            glutPostRedisplay();
+        break;
+
+        case 6://Translacao
+            triangulo = false;
+			linha = false;
+			quadrilatero = false;
+			poligono = false;
+			circulo = false;
+            system("cls");
+            printf("\n Digite o valor de Translacao em X: ");
+            scanf("%lf", &translacaoX);
+            printf("\n Digite o valor de Translacao em Y: ");
+            scanf("%lf", &translacaoY);
+            glutPostRedisplay();
+        break;
+
+        case 8://cisalhamento em X
+            triangulo = false;
+			linha = false;
+			quadrilatero = false;
+			poligono = false;
+			circulo = false;
+            system("cls");
+            printf("\n Digite o valor de cisalhamento: ");
+            scanf("%lf", &fatorCisalhamento);
+            cisalhamentoEmX();
+            glutPostRedisplay();
+        break;
+
+        case 9://cisalhamento em Y
+            triangulo = false;
+			linha = false;
+			quadrilatero = false;
+			poligono = false;
+			circulo = false;
+            system("cls");
+            printf("\n Digite o valor de cisalhamento: ");
+            scanf("%lf", &fatorCisalhamento);
+            cisalhamentoEmY();
+            glutPostRedisplay();
+        break;
+
+        case 10:
             limpaTela();
 		break;
 
-		case 6:
+		case 11:
 		    exit(0);
         break;
     }
@@ -608,3 +668,63 @@ void desenhaCirculo(double x,double y, double r){
 		x_aux++;
 	}
 }
+
+void escala() {
+	coordenadasArmazenadas *coordArmazenadas;
+	coordArmazenadas = listaCoord;
+	listaCoord = NULL;
+
+	while(coordArmazenadas != NULL) {
+		coordArmazenadas->x1 *= escalaX;
+		coordArmazenadas->y1 *= escalaY;
+		coordArmazenadas->x2 *= escalaX;
+		coordArmazenadas->y2 *= escalaY;
+
+		bresenham(coordArmazenadas->x1, coordArmazenadas->y1, coordArmazenadas->x2, coordArmazenadas->y2);
+		drawPontos();
+
+
+		coordArmazenadas = coordArmazenadas->prox;
+	}
+	escalaX = 1;
+	escalaY = 1;
+}
+
+void cisalhamentoEmX() {
+	coordenadasArmazenadas *coordArmazenadas;
+	coordArmazenadas = listaCoord;
+	listaCoord = NULL;
+
+	while(coordArmazenadas != NULL) {
+        coordArmazenadas->x1 += (fatorCisalhamento * coordArmazenadas->y1);
+        coordArmazenadas->x2 += (fatorCisalhamento * coordArmazenadas->y2);
+
+		bresenham(coordArmazenadas->x1, coordArmazenadas->y1, coordArmazenadas->x2, coordArmazenadas->y2);
+
+		drawPontos();
+
+		coordArmazenadas = coordArmazenadas->prox;
+	}
+	fatorCisalhamento = 1;
+}
+
+void cisalhamentoEmY() {
+	coordenadasArmazenadas *coordArmazenadas;
+	coordArmazenadas = listaCoord;
+	listaCoord = NULL;
+
+	while(coordArmazenadas != NULL) {
+        coordArmazenadas->y1 += (fatorCisalhamento * coordArmazenadas->x1);
+        coordArmazenadas->y2 += (fatorCisalhamento * coordArmazenadas->x2);
+
+		bresenham(coordArmazenadas->x1, coordArmazenadas->y1, coordArmazenadas->x2, coordArmazenadas->y2);
+
+		drawPontos();
+
+		coordArmazenadas = coordArmazenadas->prox;
+	}
+
+	fatorCisalhamento = 1;
+}
+
+
